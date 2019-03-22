@@ -27,17 +27,28 @@ body {
   width: 33.333%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  position: relative;
+  height: 150px;
 }
 
 /* 90 to 40 */
 .mouse {
   width: 100px;
-  transform: translateY(40px);
+  transform: translateY(90px);
+  position: absolute;
+  top: 0;
   opacity: 0;
+}
+
+.show {
+  opacity: 1;
+  z-index: 2;
+  transform: translateY(40px);
+  transition: all .5s;
 }
 
 .hole {
   width: 170px;
+  position: absolute;
+  bottom: -2px;
 }

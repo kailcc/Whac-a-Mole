@@ -1,9 +1,14 @@
 class WhacAMole {
-  constructor({ el, ...options }) {
-    this.el = supports.getRootElement(el)
+  constructor({ el, storeEl, ...options }) {
+    this.el = supports.getElement(el)
+    this.storeEl = supports.getElement(storeEl)
+
     this.jumpOutMoles = undefined
 
     this.store = undefined
+    this.missRecord = undefined
+
+    this.pool = undefined
 
     this.options = options
 
@@ -15,19 +20,24 @@ class WhacAMole {
   init() {
     const { moleCount } = this.options
     const moleContent = Array(moleCount).fill(null).map((v, i) => moleGroup(i)).join('')
-    // 初始化地鼠
+    // 初始化
     this.el.innerHTML = moleContent
-    // 初始化地鼠记录
+    // 地鼠记录
     this.jumpOutMoles = new Set()
-    // 初始化分数
+    // 得分
     this.store = 0
+    // 错过多少个
+    this.missRecord = 0
 
     // 注册敲击事件
     this.el.addEventListener('click', (event) => {
-      const groupclassId = event.path[1].id
+      const moleID = event.target.id || event.path[1].id
 
-      if (this.jumpOutMoles.has(groupclassId)) {
-        console.log(this.store++)
+      if (this.jumpOutMoles.has(moleID)) {
+        this.dischargeMole(DOMcache[moleID], moleID)
+
+        this.store++
+        supports.updateStore(this.storeEl, this.store)
       }
     })
 
@@ -37,24 +47,44 @@ class WhacAMole {
   start() {
     const { moleCount } = this.options
 
+    let pool = this.pool = Array(moleCount).fill(null).map((v, i) => i)
+
     setInterval(() => {
-      const index = Math.floor(Math.random() * moleCount)
-      this.toggleMole(index)
-    }, 1000)
+      if (pool.length === 0) {
+        pool = this.pool = Array(moleCount).fill(null).map((v, i) => i)
+      }
+
+      const index = pool.splice(parseInt(Math.random() * (pool.length - 1)), 1)[0]
+      const moleID = `group${index}`
+
+      this.toggleMole(moleID)
+    }, DEFAULT_CONFIG.MOLE_SHOW_TIME)
   }
 
-  toggleMole(index) {
-    const moleDOM = DOMcache[index] = DOMcache[index] || document.querySelector(`#group${index} .mouse`)
-    const moleID = `group${index}`
+  toggleMole(moleID) {
+    const moleDOM = DOMcache[moleID] = DOMcache[moleID] || document.querySelector(`#${moleID} .mouse`)
 
-    moleDOM.style.opacity = 1
+    supports.addClass(moleDOM)
     this.jumpOutMoles.add(moleID)
 
     setTimeout(() => {
-      moleDOM.style.opacity = 0
-      this.jumpOutMoles.delete(moleID)
-    }, 1000)
+      if (this.jumpOutMoles.has(moleID)) {
+        this.dischargeMole(moleDOM, moleID)
+
+        this.missRecord++
+      }
+    }, DEFAULT_CONFIG.MOLE_SHOW_TIME)
   }
+
+  dischargeMole(moleDOM, moleID) {
+    supports.deleteClass(moleDOM)
+    this.jumpOutMoles.delete(moleID)
+  }
+}
+
+const DEFAULT_CONFIG = {
+  // 地鼠出现时间
+  'MOLE_SHOW_TIME': 3000,
 }
 
 const DOMcache = {}
@@ -67,15 +97,26 @@ const moleGroup = index => `
 `
 
 const supports = {
-  getRootElement(el) {
+  getElement(el) {
     if (typeof el === 'string') {
       return document.querySelector(el)
     }
 
-    return isElementNode(el) || document.body
+    throw Error('require el')
   },
   isElementNode(node) {
     return node.nodeType === 1 && node
+  },
+  addClass(node, newclass = 'show') {
+    const className = node.className
+    node.className = `${className} ${newclass}`
+  },
+  deleteClass(node, newclass = 'show') {
+    const className = node.className
+    node.className = className.replace(newclass, '').replace(/\s/g, '')
+  },
+  updateStore(node, store) {
+    node.innerText = `得分 为${store}`
   }
 }
 
@@ -83,6 +124,7 @@ window.onload = () => {
   new WhacAMole(
     {
       el: '#game',
+      storeEl: '#count',
       moleCount: 9,
     }
   )
