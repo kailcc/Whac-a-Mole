@@ -1,0 +1,43 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('./static/image/bg.jpg');
+}
+
+#game {
+  width: 760px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#game {
+  cursor: url('./static/image/cursor.png') 0 0, default;
+}
+
+#game:active {
+  cursor: url('./static/image/cursor-down.png') 0 0, default;
+}
+
+.group {
+  width: 33.333%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* 90 to 40 */
+.mouse {
+  width: 100px;
+  transform: translateY(40px);
+  opacity: 0;
+}
+
+.hole {
+  width: 170px;
+}
