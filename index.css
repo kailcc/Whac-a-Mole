@@ -4,6 +4,7 @@ html, body {
 
 body {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background: url('./static/image/bg.jpg');

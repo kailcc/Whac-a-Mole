@@ -1,7 +1,8 @@
 class WhacAMole {
-  constructor({ el, storeEl, ...options }) {
+  constructor({ el, storeEl, missEl, ...options }) {
     this.el = supports.getElement(el)
     this.storeEl = supports.getElement(storeEl)
+    this.missEl = supports.getElement(missEl)
 
     this.jumpOutMoles = undefined
 
@@ -72,6 +73,7 @@ class WhacAMole {
         this.dischargeMole(moleDOM, moleID)
 
         this.missRecord++
+        supports.updateMiss(this.missEl, this.missRecord)
       }
     }, DEFAULT_CONFIG.MOLE_SHOW_TIME)
   }
@@ -116,7 +118,10 @@ const supports = {
     node.className = className.replace(newclass, '').replace(/\s/g, '')
   },
   updateStore(node, store) {
-    node.innerText = `得分 为${store}`
+    node.innerText = `store: ${store}`
+  },
+  updateMiss(node, store) {
+    node.innerText = `miss: ${store}`
   }
 }
 
@@ -124,7 +129,8 @@ window.onload = () => {
   new WhacAMole(
     {
       el: '#game',
-      storeEl: '#count',
+      storeEl: '#store',
+      missEl: '#miss',
       moleCount: 9,
     }
   )
